@@ -1,0 +1,6 @@
+[submodule "splits"]
+	path = splits
+	url = https://github.com/aricursion/splits
+[submodule "cadical-units"]
+	path = cadical-units
+	url = https://github.com/jreeves3/cadical-units
