@@ -6,24 +6,24 @@
 --unitstart=<N>     : number of learned clauses before unit priniting starts
 """
 
-import os
-import sys
 from dataclasses import dataclass
 import subprocess
 from concurrent.futures import ProcessPoolExecutor
+import argparse
 
 executor_sat = ProcessPoolExecutor(max_workers=23)
 
 
 def parse_unit_line(line: str) -> int:
-    int(line.split(" ")[2])
+    return int(line.split(" ")[2])
 
 
-def run_cadical_units(cnf: str, unit_count: int, unit_gap: int, unit_gap_grow: int, unit_start: int):
+def run_cadical_units(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_grow: int, unit_start: int):
     p = subprocess.run(
         [
             "./cadical-units",
-            cnf,
+            cnf_loc,
+            "-q",
             "/dev/null",
             "--unitprint",
             f"--unitcount={unit_count}",
@@ -36,16 +36,20 @@ def run_cadical_units(cnf: str, unit_count: int, unit_gap: int, unit_gap_grow: i
     return p
 
 
-def run_cadical(cnf: str, timeout: int):
+# no timeout by default
+def run_cadical(cnf_loc: str, timeout=-1):
     try:
-        p = subprocess.run(["cadical", cnf], stdout=subprocess.PIPE, timeout=int(timeout))
+        if timeout > 0:
+            p = subprocess.run(["cadical", cnf_loc], stdout=subprocess.PIPE, timeout=timeout)
+        else:
+            p = subprocess.run(["cadical", cnf_loc], stdout=subprocess.PIPE)
     except subprocess.TimeoutExpired:
         p = "FAILURE"
     return p
 
 
-def find_units_to_split(cnf: str, unit_count: int, unit_gap: int, unit_gap_grow: int, unit_start: int):
-    submitted_proc = executor_sat.submit(run_cadical_units, [cnf, unit_count, unit_gap, unit_gap_grow, unit_start])
+def find_units_to_split(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_grow: int, unit_start: int):
+    submitted_proc = executor_sat.submit(run_cadical_units, cnf_loc, unit_count, unit_gap, unit_gap_grow, unit_start)
     output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
 
     output_lines = output.split("\n")
@@ -59,11 +63,34 @@ def find_units_to_split(cnf: str, unit_count: int, unit_gap: int, unit_gap_grow:
 @dataclass
 class CadicalResult:
     time: float
+    learned: int
+    props: int
 
 
 def cadical_parse_results(cadical_output: str):
-    pass
+    stats_str = cadical_output.split("[ statistics ]")[-1].split("[ resources ]")[0]
+
+    learned = int(stats_str[stats_str.find("learned") :].split(":")[1].split("per")[0].strip().split(" ")[0])
+    props = int(stats_str[stats_str.find("propagations") :].split(":")[1].split("per")[0].strip().split(" ")[0])
+    time_str = cadical_output.split("[ resources ]")[-1]
+    time_loc = time_str.find("total process time since initialization")
+    time_str = time_str[time_loc:]
+    time = float(time_str.split(":")[1].split("seconds")[0].strip())
+
+    return CadicalResult(time, learned, props)
 
 
 if __name__ == "__main__":
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cnf", dest="cnf", required=True)
+    parser.add_argument("--unit-count", dest="unit_count", required=True)
+
+    parser.add_argument("--unit-gap", dest="unit_gap", default=0)
+    parser.add_argument("--unit-gapgrow", dest="unit_gapgrow", default=0)
+    parser.add_argument("--unit-start", dest="unit_start", default=0)
+    args = parser.parse_args()
+
+    submitted_proc = executor_sat.submit(run_cadical, args.cnf)
+    output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
+
+    print(cadical_parse_results(output))
