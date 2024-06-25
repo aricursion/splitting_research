@@ -11,8 +11,9 @@ import subprocess
 from concurrent.futures import ProcessPoolExecutor
 import argparse
 import time
+import os
 
-executor_sat = ProcessPoolExecutor(max_workers=23)
+executor_sat = ProcessPoolExecutor(max_workers=10)
 
 
 @dataclass
@@ -59,6 +60,8 @@ def run_cadical(cnf_loc: str, timeout=-1):
             p = subprocess.run(["cadical", cnf_loc], stdout=subprocess.PIPE)
     except subprocess.TimeoutExpired:
         p = "FAILURE"
+
+    os.remove(cnf_loc)
     return p
 
 
@@ -69,6 +72,8 @@ def find_units_to_split(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_g
     output_lines = output.split("\n")
     out_units = []
     for line in output_lines:
+        if "s SATISFIABLE" in line or "s UNSATISFIABLE" in line:
+            continue
         out_units.append(abs(parse_unit_line(line)))
 
     return out_units
@@ -99,24 +104,31 @@ def add_cube_to_cnf(cnf_loc: str, cube: list[int]):
     header = cnf_parse_header(cnf_string)
     new_num_clauses = header.clause_num + len(cube)
 
-    out = f"p cnf {header.vars} {new_num_clauses}\n"
+    out = f"p cnf {header.var_num} {new_num_clauses}\n"
     out += "\n".join(cnf_string.split("\n")[1:])
 
     for lit in cube:
         out += f"{lit} 0\n"
 
-    f = open(f"tmp/{tag}.wcnf", "w+")
+    f = open(f"tmp/{tag}.cnf", "w+")
     f.write(out)
     f.close()
-    return f"tmp/{tag}.wcnf"
+    return f"tmp/{tag}.cnf"
 
 
-def find_tree(args, current_cube: list[int], cnf_loc: str, time_cutoff: str, log_file: str):
-    log_file = open(log_file, "a")
-    splitting_units = find_units_to_split(cnf_loc, args.unit_count, args.unit_gap, args.unit_gap_grow, args.unit_start)
+def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: float):
+    log_file = open(args.all_log, "a")
+    cnf_loc = str(args.cnf)
 
+    current_cube_cnf_loc = add_cube_to_cnf(cnf_loc, current_cube)
+    splitting_units = find_units_to_split(
+        current_cube_cnf_loc, args.unit_count, args.unit_gap, args.unit_gap_grow, args.unit_start
+    )
+    os.remove(current_cube_cnf_loc)
+
+    print(splitting_units)
     procs = []
-    metrics = []
+    metrics = {}
     for i, unit in enumerate(splitting_units):
         if unit in current_cube or -unit in current_cube:
             continue
@@ -124,8 +136,8 @@ def find_tree(args, current_cube: list[int], cnf_loc: str, time_cutoff: str, log
         new_neg_cube = current_cube + [-unit]
         pos_cnf_loc = add_cube_to_cnf(cnf_loc, new_pos_cube)
         neg_cnf_loc = add_cube_to_cnf(cnf_loc, new_neg_cube)
-        pos_proc = executor_sat.submit(run_cadical, pos_cnf_loc, -1)  # TODO: Replace -1
-        neg_proc = executor_sat.submit(run_cadical, neg_cnf_loc, -1)
+        pos_proc = executor_sat.submit(run_cadical, pos_cnf_loc, prev_time)
+        neg_proc = executor_sat.submit(run_cadical, neg_cnf_loc, prev_time)
         procs.append((pos_proc, neg_proc, new_pos_cube, new_neg_cube))
 
     for pos_proc, neg_proc, npc, nnc in procs:
@@ -147,17 +159,56 @@ def find_tree(args, current_cube: list[int], cnf_loc: str, time_cutoff: str, log
             except Exception:
                 neg_cadical_result = CadicalResult(8888, 8888, 8888)
 
-        metrics.append((npc[-1], (pos_cadical_result, neg_cadical_result)))
+        metrics[npc[-1]] = (pos_cadical_result, neg_cadical_result)
         log_file.write(
             ",".join(list(map(str, npc)))
-            + f" {time: pos_cadical_result.time, learned: pos_cadical_result.learned, props: pos_cadical_result.props}"
+            + " time: {}, learned: {}, props: {}\n".format(
+                pos_cadical_result.time, pos_cadical_result.learned, pos_cadical_result.props
+            )
         )
         log_file.write(
             ",".join(list(map(str, nnc)))
-            + f" {time: neg_cadical_result.time, learned: neg_cadical_result.learned, props: neg_cadical_result.props}"
+            + " time: {}, learned: {}, props: {}\n".format(
+                neg_cadical_result.time, neg_cadical_result.learned, neg_cadical_result.props
+            )
         )
         log_file.flush()
     log_file.close()
+
+    time_metrics = {k: max(res1.time, res2.time) for (k, (res1, res2)) in metrics.items()}
+    best_splitting_var = min(time_metrics, key=time_metrics.get)
+    best_pos_metric, best_neg_metric = metrics[best_splitting_var]
+    best_pos_time = best_pos_metric.time
+    best_neg_time = best_neg_metric.time
+
+    best_max_time = max(best_pos_time, best_neg_time)
+    if best_max_time >= 0.9 * prev_time:
+        return
+
+    next_pos_cube = current_cube + [best_splitting_var]
+    next_neg_cube = current_cube + [-best_splitting_var]
+
+    log_file = open(args.best_log, "a")
+    log_file.write(
+        ",".join(list(map(str, next_pos_cube)))
+        + " time: {}, learned: {}, props: {}\n".format(
+            best_pos_metric.time, best_pos_metric.learned, best_pos_metric.props
+        )
+    )
+    log_file.write(
+        ",".join(list(map(str, next_neg_cube)))
+        + " time: {}, learned: {}, props: {}\n".format(
+            best_neg_metric.time, best_neg_metric.learned, best_neg_metric.props
+        )
+    )
+    log_file.flush()
+    log_file.close()
+
+    if best_pos_time > time_cutoff:
+        find_tree(args, next_pos_cube, time_cutoff, best_pos_time)
+
+    if best_neg_time > time_cutoff:
+        find_tree(args, next_neg_cube, time_cutoff, best_pos_time)
 
 
 if __name__ == "__main__":
@@ -165,12 +216,13 @@ if __name__ == "__main__":
     parser.add_argument("--cnf", dest="cnf", required=True)
     parser.add_argument("--unit-count", dest="unit_count", required=True)
 
-    parser.add_argument("--unit-gap", dest="unit_gap", default=0)
-    parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", default=0)
-    parser.add_argument("--unit-start", dest="unit_start", default=0)
+    parser.add_argument("--unit-gap", dest="unit_gap", default=100)
+    parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", default=1)
+    parser.add_argument("--unit-start", dest="unit_start", default=5000)
+    parser.add_argument("--all-log", dest="all_log", required=True)
+    parser.add_argument("--best-log", dest="best_log", required=True)
     args = parser.parse_args()
 
-    submitted_proc = executor_sat.submit(run_cadical, args.cnf)
-    output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
-
-    print(cadical_parse_results(output))
+    os.makedirs("tmp", exist_ok=True)
+    os.makedirs("log", exist_ok=True)
+    find_tree(args, [], 0.1, 10000)
