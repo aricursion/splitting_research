@@ -240,4 +240,4 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_tree(args, [], 0.1, 10000)
+    find_tree(args, [], 120, 172800)
