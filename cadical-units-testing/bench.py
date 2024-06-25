@@ -1,11 +1,3 @@
-"""
---unitcount           : number of units before exiting
---unitprint         : print units to stdout
---unitgap=<N>       : number of learned clauses between printed units
---unitgapgrow=<N>   : multiplier for gap after each printed unit
---unitstart=<N>     : number of learned clauses before unit priniting starts
-"""
-
 from dataclasses import dataclass
 import subprocess
 from concurrent.futures import ProcessPoolExecutor
@@ -48,6 +40,8 @@ def run_cadical_units(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_gro
         ],
         stdout=subprocess.PIPE,
     )
+
+    os.remove(cnf_loc)
     return p
 
 
@@ -124,7 +118,6 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
     splitting_units = find_units_to_split(
         current_cube_cnf_loc, args.unit_count, args.unit_gap, args.unit_gap_grow, args.unit_start
     )
-    os.remove(current_cube_cnf_loc)
 
     print(splitting_units)
     procs = []
@@ -175,7 +168,7 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
         log_file.flush()
     log_file.close()
 
-    time_metrics = {k: max(res1.time, res2.time) for (k, (res1, res2)) in metrics.items()}
+    time_metrics = {var: max(res1.time, res2.time) for (var, (res1, res2)) in metrics.items()}
     best_splitting_var = min(time_metrics, key=time_metrics.get)
     best_pos_metric, best_neg_metric = metrics[best_splitting_var]
     best_pos_time = best_pos_metric.time
@@ -208,7 +201,7 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
         find_tree(args, next_pos_cube, time_cutoff, best_pos_time)
 
     if best_neg_time > time_cutoff:
-        find_tree(args, next_neg_cube, time_cutoff, best_pos_time)
+        find_tree(args, next_neg_cube, time_cutoff, best_neg_time)
 
 
 if __name__ == "__main__":
@@ -224,5 +217,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     os.makedirs("tmp", exist_ok=True)
-    os.makedirs("log", exist_ok=True)
+    os.makedirs(os.path.dirname(args.all_log), exist_ok=True)
+    os.makedirs(os.path.dirname(args.best_log), exist_ok=True)
     find_tree(args, [], 0.1, 10000)
