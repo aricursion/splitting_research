@@ -3,9 +3,11 @@ import subprocess
 from concurrent.futures import ProcessPoolExecutor
 import argparse
 import time
+import multiprocessing
 import os
 
-executor_sat = ProcessPoolExecutor(max_workers=10)
+
+executor_sat = None
 
 
 @dataclass
@@ -214,8 +216,11 @@ if __name__ == "__main__":
     parser.add_argument("--unit-start", dest="unit_start", default=5000)
     parser.add_argument("--all-log", dest="all_log", required=True)
     parser.add_argument("--best-log", dest="best_log", required=True)
+    parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
+    print(args.procs)
 
+    executor_sat = ProcessPoolExecutor(max_workers=args.procs)
     os.makedirs("tmp", exist_ok=True)
     os.makedirs(os.path.dirname(args.all_log), exist_ok=True)
     os.makedirs(os.path.dirname(args.best_log), exist_ok=True)
