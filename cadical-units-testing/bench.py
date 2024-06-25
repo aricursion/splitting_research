@@ -206,11 +206,18 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
         find_tree(args, next_neg_cube, time_cutoff, best_neg_time)
 
 
+def config_to_string(args):
+    out = "cnf: {} ".format(args.cnf)
+    out += "unit-gap: {} ".format(args.unit_gap)
+    out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
+    out += "unit-start: {} ".format(args.unit_start)
+    return out
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cnf", dest="cnf", required=True)
     parser.add_argument("--unit-count", dest="unit_count", required=True)
-
     parser.add_argument("--unit-gap", dest="unit_gap", default=100)
     parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", default=1)
     parser.add_argument("--unit-start", dest="unit_start", default=5000)
@@ -218,10 +225,19 @@ if __name__ == "__main__":
     parser.add_argument("--best-log", dest="best_log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
-    print(args.procs)
 
     executor_sat = ProcessPoolExecutor(max_workers=args.procs)
+
     os.makedirs("tmp", exist_ok=True)
     os.makedirs(os.path.dirname(args.all_log), exist_ok=True)
     os.makedirs(os.path.dirname(args.best_log), exist_ok=True)
+    with open(args.all_log, "a") as f:
+        f.write("# all data log\n")
+        f.write("# {}\n".format(config_to_string(args)))
+        f.close()
+    with open(args.best_log, "a") as f:
+        f.write("# best data log\n")
+        f.write("# {}\n".format(config_to_string(args)))
+        f.close()
+
     find_tree(args, [], 0.1, 10000)
