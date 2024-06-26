@@ -123,6 +123,9 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
     )
     unit_find_time = time.time() - cur
 
+    if len(splitting_units) == 0:
+        return 
+
     log_file.write(f"# finding units time: {unit_find_time:.2f}\n")
 
     print(splitting_units)
