@@ -42,7 +42,6 @@ def run_cadical_units(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_gro
         ],
         stdout=subprocess.PIPE,
     )
-
     os.remove(cnf_loc)
     return p
 
@@ -124,9 +123,10 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
     unit_find_time = time.time() - cur
 
     if len(splitting_units) == 0:
-        return 
+        return
 
     log_file.write(f"# finding units time: {unit_find_time:.2f}\n")
+    log_file.flush()
 
     print(splitting_units)
     procs = []
@@ -224,10 +224,12 @@ def config_to_string(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cnf", dest="cnf", required=True)
-    parser.add_argument("--unit-count", dest="unit_count", required=True)
-    parser.add_argument("--unit-gap", dest="unit_gap", default=100)
-    parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", default=1)
-    parser.add_argument("--unit-start", dest="unit_start", default=5000)
+    parser.add_argument("--unit-count", dest="unit_count", type=int, required=True)
+    parser.add_argument("--unit-gap", dest="unit_gap", type=int, default=100)
+    parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", type=int, default=1)
+    parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
+    parser.add_argument("--max-timeout", dest="max_timeout", type=int, default=2e7)
+    parser.add_argument("--min-time", dest="min_time", type=int, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
     parser.add_argument("--best-log", dest="best_log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
@@ -247,4 +249,4 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_tree(args, [], 120, 172800)
+    find_tree(args, [], args.min_time, args.max_timeout)
