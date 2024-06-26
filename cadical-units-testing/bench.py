@@ -228,7 +228,7 @@ if __name__ == "__main__":
     parser.add_argument("--unit-gap", dest="unit_gap", type=int, default=100)
     parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", type=int, default=1)
     parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
-    parser.add_argument("--max-timeout", dest="max_timeout", type=int, default=2e7)
+    parser.add_argument("--max-timeout", dest="max_timeout", type=int, default=2e5)
     parser.add_argument("--min-time", dest="min_time", type=int, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
     parser.add_argument("--best-log", dest="best_log", required=True)
