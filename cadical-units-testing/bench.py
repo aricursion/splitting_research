@@ -117,9 +117,13 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
     cnf_loc = str(args.cnf)
 
     current_cube_cnf_loc = add_cube_to_cnf(cnf_loc, current_cube)
+    cur = time.time()
     splitting_units = find_units_to_split(
         current_cube_cnf_loc, args.unit_count, args.unit_gap, args.unit_gap_grow, args.unit_start
     )
+    unit_find_time = time.time() - cur
+
+    log_file.write(f"# finding units time: {unit_find_time:.2f}\n")
 
     print(splitting_units)
     procs = []
