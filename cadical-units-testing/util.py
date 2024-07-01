@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import subprocess
 import time
 import os
+from itertools import product
 
 executor_sat = None
 
@@ -105,3 +106,9 @@ def add_cube_to_cnf(cnf_loc: str, cube: list[int]):
     f.write(out)
     f.close()
     return f"tmp/{tag}.cnf"
+
+
+def generate_hypercube(cube):
+    pos_neg_pairs = [(num, -num) for num in cube]
+    combinations = list(product(*pos_neg_pairs))
+    return list(map(list, combinations))
