@@ -39,7 +39,6 @@ def run_cadical_units(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_gro
         ],
         stdout=subprocess.PIPE,
     )
-    os.remove(cnf_loc)
     return p
 
 
@@ -53,7 +52,6 @@ def run_cadical(cnf_loc: str, timeout=-1):
     except subprocess.TimeoutExpired:
         p = "FAILURE"
 
-    os.remove(cnf_loc)
     return p
 
 
