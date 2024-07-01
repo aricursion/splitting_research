@@ -31,7 +31,7 @@ def find_hypercube(args):
 
         log_file.write(
             ",".join(list(map(str, cube)))
-            + "time: {}, learned: {}, props: {}\n".format(
+            + " time: {}, learned: {}, props: {}\n".format(
                 cadical_result.time, cadical_result.learned, cadical_result.props
             )
         )
