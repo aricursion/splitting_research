@@ -1,9 +1,12 @@
 [submodule "splits"]
 	path = splits
 	url = https://github.com/aricursion/splits
+    branch = main
 [submodule "cadical-units"]
 	path = cadical-units
 	url = https://github.com/jreeves3/cadical-units
+    branch = main
 [submodule "cadical-lit-count"]
 	path = cadical-lit-count
 	url = https://github.com/aricursion/cadical-lit-count
+    branch = master
