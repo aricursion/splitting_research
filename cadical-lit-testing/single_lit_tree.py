@@ -13,25 +13,25 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
 
     current_cube_cnf_loc = add_cube_to_cnf(cnf_loc, current_cube)
     cur = time.time()
-    splitting_units = find_lits_to_split(
-        current_cube_cnf_loc, args.unit_count, args.unit_gap, args.unit_gap_grow, args.unit_start
+    splitting_lits = find_lits_to_split(
+        current_cube_cnf_loc, args.lit_count, args.lit_gap, args.lit_gap_grow, args.lit_start
     )
-    unit_find_time = time.time() - cur
+    lit_find_time = time.time() - cur
 
-    if len(splitting_units) == 0:
+    if len(splitting_lits) == 0:
         return
 
-    log_file.write(f"# finding units time: {unit_find_time:.2f}\n")
+    log_file.write(f"# finding lits time: {lit_find_time:.2f}\n")
     log_file.flush()
 
-    print(splitting_units)
+    print(splitting_lits)
     procs = []
     metrics = {}
-    for i, unit in enumerate(splitting_units):
-        if unit in current_cube or -unit in current_cube:
+    for i, lit in enumerate(splitting_lits):
+        if lit in current_cube or -lit in current_cube:
             continue
-        new_pos_cube = current_cube + [unit]
-        new_neg_cube = current_cube + [-unit]
+        new_pos_cube = current_cube + [lit]
+        new_neg_cube = current_cube + [-lit]
         pos_cnf_loc = add_cube_to_cnf(cnf_loc, new_pos_cube)
         neg_cnf_loc = add_cube_to_cnf(cnf_loc, new_neg_cube)
         pos_proc = util.executor_sat.submit(run_cadical, pos_cnf_loc, prev_time)
@@ -111,19 +111,19 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
 
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
-    out += "unit-gap: {} ".format(args.unit_gap)
-    out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
-    out += "unit-start: {} ".format(args.unit_start)
+    out += "lit-gap: {} ".format(args.lit_gap)
+    out += "lit-gap-grow: {} ".format(args.lit_gap_grow)
+    out += "lit-start: {} ".format(args.lit_start)
     return out
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cnf", dest="cnf", required=True)
-    parser.add_argument("--unit-count", dest="unit_count", type=int, required=True)
-    parser.add_argument("--unit-gap", dest="unit_gap", type=int, default=100)
-    parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", type=int, default=1)
-    parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
+    parser.add_argument("--lit-count", dest="lit_count", type=int, required=True)
+    parser.add_argument("--lit-gap", dest="lit_gap", type=int, default=100)
+    parser.add_argument("--lit-gapgrow", dest="lit_gap_grow", type=int, default=1)
+    parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
     parser.add_argument("--max-timeout", dest="max_timeout", type=int, default=2e5)
     parser.add_argument("--min-time", dest="min_time", type=int, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
