@@ -1,0 +1,52 @@
+# cube log
+# cnf: ../cnfs/max9-sprop.cnf lit-gap: 50000 lit-gap-grow: 1 lit-start: 300000 
+Time finding cube: 9.99
+31,502,34,55,64 time: 2.55, learned: 158371, props: 7706526
+31,502,34,55,-64 time: 0.99, learned: 71283, props: 3677421
+31,502,34,-55,64 time: 1.57, learned: 106849, props: 5158665
+31,502,34,-55,-64 time: 0.6, learned: 47215, props: 2428025
+31,502,-34,55,64 time: 1.46, learned: 100646, props: 4928898
+31,502,-34,55,-64 time: 0.61, learned: 46593, props: 2551281
+31,502,-34,-55,64 time: 0.73, learned: 55875, props: 2994720
+31,502,-34,-55,-64 time: 0.26, learned: 22257, props: 1283955
+31,-502,34,55,64 time: 0.09, learned: 7892, props: 501325
+31,-502,34,55,-64 time: 0.1, learned: 9738, props: 568502
+31,-502,34,-55,64 time: 0.08, learned: 7467, props: 467237
+31,-502,34,-55,-64 time: 0.11, learned: 9975, props: 566892
+31,-502,-34,55,64 time: 0.16, learned: 14271, props: 822209
+31,-502,-34,55,-64 time: 0.19, learned: 16186, props: 877037
+31,-502,-34,-55,64 time: 0.18, learned: 15928, props: 900950
+31,-502,-34,-55,-64 time: 0.26, learned: 21323, props: 1193237
+-31,502,34,55,64 time: 3.66, learned: 218720, props: 9655428
+-31,502,34,55,-64 time: 2.66, learned: 162516, props: 7561577
+-31,502,34,-55,64 time: 2.6, learned: 171077, props: 7503588
+-31,502,34,-55,-64 time: 1.22, learned: 89194, props: 4324006
+-31,502,-34,55,64 time: 2.38, learned: 151838, props: 6958517
+-31,502,-34,55,-64 time: 1.4, learned: 99944, props: 4971700
+-31,502,-34,-55,64 time: 1.07, learned: 80668, props: 3928922
+-31,502,-34,-55,-64 time: 0.53, learned: 43874, props: 2213029
+-31,-502,34,55,64 time: 0.04, learned: 3938, props: 248657
+-31,-502,34,55,-64 time: 0.05, learned: 5019, props: 318677
+-31,-502,34,-55,64 time: 0.04, learned: 4750, props: 284694
+-31,-502,34,-55,-64 time: 0.06, learned: 5791, props: 381515
+-31,-502,-34,55,64 time: 0.06, learned: 5696, props: 385750
+-31,-502,-34,55,-64 time: 0.09, learned: 8676, props: 532499
+-31,-502,-34,-55,64 time: 0.07, learned: 6851, props: 469243
+-31,-502,-34,-55,-64 time: 0.09, learned: 8286, props: 503042
+Cube sum time: 25.96
+Avg cube time: 0.81
+StdDev cube time: 0.97
+# cube log
+# cnf: ../cnfs/max9-sprop.cnf lit-gap: 50000 lit-gap-grow: 1 lit-start: 300000 
+Time finding cube: 7.32
+31,502,34 time: 5.35, learned: 296706, props: 13567836
+31,502,-34 time: 2.92, learned: 179119, props: 8122820
+31,-502,34 time: 0.16, learned: 14179, props: 763348
+31,-502,-34 time: 0.56, learned: 41649, props: 2125601
+-31,502,34 time: 11.62, learned: 548529, props: 22655065
+-31,502,-34 time: 4.72, learned: 276168, props: 12141983
+-31,-502,34 time: 0.09, learned: 8430, props: 554680
+-31,-502,-34 time: 0.13, learned: 12348, props: 688772
+Cube sum time: 25.55
+Avg cube time: 3.19
+StdDev cube time: 3.76
