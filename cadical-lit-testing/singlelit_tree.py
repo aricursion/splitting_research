@@ -41,9 +41,9 @@ def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_tim
         neg_cnf_loc = add_cube_to_cnf(cnf_loc, new_neg_cube)
         pos_proc = util.executor_sat.submit(run_cadical, pos_cnf_loc, prev_time)
         neg_proc = util.executor_sat.submit(run_cadical, neg_cnf_loc, prev_time)
-        procs.append((pos_proc, neg_proc, new_pos_cube, new_neg_cube))
+        procs.append((pos_proc, neg_proc, new_pos_cube, new_neg_cube, pos_cnf_loc, neg_cnf_loc))
 
-    for pos_proc, neg_proc, npc, nnc in procs:
+    for pos_proc, neg_proc, npc, nnc, pos_loc, neg_loc in procs:
         if pos_proc.result() == "FAILURE":
             pos_cadical_result = CadicalResult(9999, 9999, 9999)
         else:
@@ -75,6 +75,8 @@ def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_tim
                 neg_cadical_result.time, neg_cadical_result.learned, neg_cadical_result.props
             )
         )
+        os.remove(pos_loc)
+        os.remove(neg_loc)
         log_file.flush()
     log_file.close()
 

@@ -30,8 +30,8 @@ def find_hypercube(args):
     for cube in hypercube:
         new_cnf_loc = util.add_cube_to_cnf(args.cnf, cube)
         proc = util.executor_sat.submit(util.run_cadical, new_cnf_loc, 999999)
-        procs.append((proc, cube))
-    for proc, cube in procs:
+        procs.append((proc, cube, new_cnf_loc))
+    for proc, cube, loc in procs:
         try:
             output = str(proc.result().stdout.decode("utf-8")).strip()
             cadical_result = util.cadical_parse_results(output)
@@ -45,6 +45,7 @@ def find_hypercube(args):
             )
         )
         times.append(cadical_result.time)
+        os.remove(loc)
         log_file.flush()
 
     log_file.write("Cube sum time: {:.2f}\n".format(sum(times)))
