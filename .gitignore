@@ -3,5 +3,6 @@ venv/
 .vscode/
 tmp/
 log/
+logs/
 notes/
 __pycache__/

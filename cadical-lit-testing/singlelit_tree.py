@@ -7,14 +7,18 @@ from util import CadicalResult, add_cube_to_cnf, find_lits_to_split, run_cadical
 import util
 
 
-def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: float):
+def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_time: float):
     log_file = open(args.all_log, "a")
     cnf_loc = str(args.cnf)
 
     current_cube_cnf_loc = add_cube_to_cnf(cnf_loc, current_cube)
     cur = time.time()
     splitting_lits = find_lits_to_split(
-        current_cube_cnf_loc, args.lit_count, args.lit_gap, args.lit_gap_grow, args.lit_start
+        current_cube_cnf_loc,
+        args.lit_count,
+        args.lit_gap - (args.lit_gap_dec * depth),
+        args.lit_gap_grow,
+        args.lit_start,
     )
     lit_find_time = time.time() - cur
 
@@ -103,10 +107,10 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_time: floa
     log_file.close()
 
     if best_pos_time > time_cutoff:
-        find_tree(args, next_pos_cube, time_cutoff, best_pos_time)
+        find_tree(args, next_pos_cube, depth + 1, time_cutoff, best_pos_time)
 
     if best_neg_time > time_cutoff:
-        find_tree(args, next_neg_cube, time_cutoff, best_neg_time)
+        find_tree(args, next_neg_cube, depth + 1, time_cutoff, best_neg_time)
 
 
 def config_to_string(args):
@@ -124,6 +128,7 @@ if __name__ == "__main__":
     parser.add_argument("--lit-gap", dest="lit_gap", type=int, default=100)
     parser.add_argument("--lit-gapgrow", dest="lit_gap_grow", type=int, default=1)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
+    parser.add_argument("--lit-gapdec", dest="lit_gap_dec", type=int, default=0)
     parser.add_argument("--max-timeout", dest="max_timeout", type=float, default=2e5)
     parser.add_argument("--min-time", dest="min_time", type=float, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
@@ -145,4 +150,4 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_tree(args, [], args.min_time, args.max_timeout)
+    find_tree(args, [], 0, args.min_time, args.max_timeout)
