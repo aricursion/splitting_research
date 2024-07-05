@@ -18,7 +18,9 @@ def config_to_string(args):
 def find_hypercube(args):
     log_file = open(args.log, "a")
     start = time.time()
-    cube_lits = util.find_lits_to_split(args.cnf, args.cube_size, args.lit_gap, args.lit_gap_grow, args.lit_start)
+    cube_lits = util.find_lits_to_split(
+        args.cnf, args.cube_size, args.lit_gap, args.lit_gap_grow, args.lit_start, args.lit_recent
+    )
     time_taken = time.time() - start
 
     log_file.write("Time finding cube: {:.2f}\n".format(time_taken))
@@ -59,6 +61,9 @@ if __name__ == "__main__":
     parser.add_argument("--lit-gap", dest="lit_gap", type=int, default=100)
     parser.add_argument("--lit-gapgrow", dest="lit_gap_grow", type=int, default=1)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
+    parser.add_argument(
+        "--lit-recent", dest="lit_recent", action=argparse.BooleanOptionalAction, type=bool, default=False
+    )
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()

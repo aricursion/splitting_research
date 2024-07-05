@@ -16,7 +16,7 @@ def find_new_lit(args, lit_start, current_cube):
     log_file = open(args.log, "a")
     start = time.time()
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
-    new_lit = util.find_lits_to_split(new_cnf_loc, 1, 0, 0, lit_start)[0]
+    new_lit = util.find_lits_to_split(new_cnf_loc, 1, 0, 0, lit_start, False)[0]
     time_taken = time.time() - start
 
     log_file.write("Time finding cube: {:.2f}\n".format(time_taken))

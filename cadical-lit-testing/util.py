@@ -24,21 +24,23 @@ def parse_lit_line(line: str) -> int:
     return int(line.split(" ")[2])
 
 
-def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int):
-    p = subprocess.run(
-        [
-            "./cadical-lits",
-            cnf_loc,
-            "-q",
-            "/dev/null",
-            "--litprint",
-            f"--litcount={lit_count}",
-            f"--litgap={lit_gap}",
-            f"--litgapgrow={lit_gap_grow}",
-            f"--litstart={lit_start}",
-        ],
-        stdout=subprocess.PIPE,
-    )
+def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
+    cmd = [
+        "./cadical-lits",
+        cnf_loc,
+        "-q",
+        "/dev/null",
+        "--litprint",
+        f"--litcount={lit_count}",
+        f"--litgap={lit_gap}",
+        f"--litgapgrow={lit_gap_grow}",
+        f"--litstart={lit_start}",
+    ]
+
+    if lit_recent:
+        cmd.append("--litrecent")
+
+    p = subprocess.run(cmd, stdout=subprocess.PIPE)
     return p
 
 
@@ -55,8 +57,12 @@ def run_cadical(cnf_loc: str, timeout=-1):
     return p
 
 
-def find_lits_to_split(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int) -> list[int]:
-    submitted_proc = executor_sat.submit(run_cadical_lits, cnf_loc, lit_count, lit_gap, lit_gap_grow, lit_start)
+def find_lits_to_split(
+    cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool
+) -> list[int]:
+    submitted_proc = executor_sat.submit(
+        run_cadical_lits, cnf_loc, lit_count, lit_gap, lit_gap_grow, lit_start, lit_recent
+    )
     output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
 
     output_lines = output.split("\n")

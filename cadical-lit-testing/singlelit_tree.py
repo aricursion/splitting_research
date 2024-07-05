@@ -19,6 +19,7 @@ def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_tim
         args.lit_gap - (args.lit_gap_dec * depth),
         args.lit_gap_grow,
         args.lit_start,
+        args.lit_recent,
     )
     lit_find_time = time.time() - cur
 
@@ -129,6 +130,9 @@ if __name__ == "__main__":
     parser.add_argument("--lit-gapgrow", dest="lit_gap_grow", type=int, default=1)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
     parser.add_argument("--lit-gapdec", dest="lit_gap_dec", type=int, default=0)
+    parser.add_argument(
+        "--lit-recent", dest="lit_recent", type=bool, action=argparse.BooleanOptionalAction, default=False
+    )
     parser.add_argument("--max-timeout", dest="max_timeout", type=float, default=2e5)
     parser.add_argument("--min-time", dest="min_time", type=float, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
