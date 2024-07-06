@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 import argparse
 import multiprocessing
 import os
+from random import random
 import time
 
 
@@ -20,7 +21,11 @@ def find_new_lit(args, lit_start, current_cube):
     time_taken = time.time() - start
 
     log_file.write("Time finding cube: {:.2f}\n".format(time_taken))
-    current_cube.append(new_lit)
+    mult = 1
+
+    if args.random and random() >= 0.5:
+        mult = -1
+    current_cube.append(mult * new_lit)
     log_file.flush()
     log_file.close()
     os.remove(new_cnf_loc)
@@ -33,6 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--cube-size", dest="cube_size", type=int, required=True)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
     parser.add_argument("--lit-start-dec", dest="lit_start_decrease", type=int, default=0)
+    parser.add_argument("--random", dest="random", action=argparse.BooleanOptionalAction, type=bool, default=False)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
