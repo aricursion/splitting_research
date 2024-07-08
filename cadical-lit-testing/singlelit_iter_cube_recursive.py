@@ -60,6 +60,6 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_cube(args, 0, [])
+    find_cube(args, 1, [])
     print(final_hc)
     util.run_hypercube(args.cnf, final_hc, args.log)
