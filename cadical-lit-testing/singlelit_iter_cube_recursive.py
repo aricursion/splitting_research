@@ -12,19 +12,31 @@ def config_to_string(args):
     return out
 
 
-def find_new_lit(args, lit_start, current_cube):
+final_hc = []
+
+
+def find_cube(args, depth, current_cube):
     log_file = open(args.log, "a")
     start = time.time()
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
-    new_lit = util.find_lits_to_split(new_cnf_loc, 1, 0, 0, lit_start, False)[0]
+    try:
+        new_lit = util.find_lits_to_split(new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * depth, False)[0]
+    except Exception:
+        final_hc.append(current_cube)
+        return
+
     time_taken = time.time() - start
 
     log_file.write("Time finding cube: {:.2f}\n".format(time_taken))
-    current_cube.append(new_lit)
     log_file.flush()
     log_file.close()
     os.remove(new_cnf_loc)
-    return current_cube
+    if depth < args.cube_size:
+        find_cube(args, depth + 1, current_cube + [new_lit])
+        find_cube(args, depth + 1, current_cube + [-new_lit])
+    else:
+        final_hc.append(current_cube + [new_lit])
+        final_hc.append(current_cube + [-new_lit])
 
 
 if __name__ == "__main__":
@@ -32,7 +44,7 @@ if __name__ == "__main__":
     parser.add_argument("--cnf", dest="cnf", required=True)
     parser.add_argument("--cube-size", dest="cube_size", type=int, required=True)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
-    parser.add_argument("--lit-start-dec", dest="lit_start_decrease", type=int, default=0)
+    parser.add_argument("--lit-start-dec", dest="lit_start_dec", type=int, default=0)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
@@ -48,9 +60,6 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    cube = []
-    for i in range(args.cube_size):
-        cube = find_new_lit(args, args.lit_start - (i * args.lit_start_decrease), cube)
-        print(cube)
-
-    util.run_hypercube(args.cnf, cube, args.log)
+    find_cube(args, 0, [])
+    print(final_hc)
+    util.run_hypercube(args.cnf, final_hc, args.log)

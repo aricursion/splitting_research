@@ -118,10 +118,13 @@ def generate_hypercube(cube):
     return list(map(list, combinations))
 
 
-def run_hypercube(cnf_loc, cube, log_file_loc, timeout=99999):
-    log_file = open(log_file_loc, "a")
+def run_hypercube_from_cube(cnf_loc, cube, log_file_loc, timeout=99999):
     hc = generate_hypercube(cube)
-    print(hc)
+    run_hypercube(cnf_loc, hc, log_file_loc, timeout=timeout)
+
+
+def run_hypercube(cnf_loc, hc, log_file_loc, timeout=99999):
+    log_file = open(log_file_loc, "a")
     procs = []
     for cube in hc:
         new_cnf_loc = add_cube_to_cnf(cnf_loc, cube)
