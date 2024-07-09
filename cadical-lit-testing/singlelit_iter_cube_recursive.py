@@ -20,7 +20,9 @@ def find_cube(args, depth, current_cube):
     start = time.time()
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
     try:
-        new_lit = util.find_lits_to_split(new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * depth, False)[0]
+        new_lit = util.find_lits_to_split(
+            new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False
+        )[0]
     except Exception:
         final_hc.append(current_cube)
         return

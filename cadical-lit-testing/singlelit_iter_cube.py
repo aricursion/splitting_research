@@ -53,4 +53,4 @@ if __name__ == "__main__":
         cube = find_new_lit(args, args.lit_start - (i * args.lit_start_decrease), cube)
         print(cube)
 
-    util.run_hypercube(args.cnf, cube, args.log)
+    util.run_hypercube_from_cube(args.cnf, cube, args.log)
