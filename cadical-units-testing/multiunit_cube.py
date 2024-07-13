@@ -15,7 +15,12 @@ def config_to_string(args):
 
 def find_hypercube(args):
     log_file = open(args.log, "a")
-    cube_units = util.find_lits_to_split(args.cnf, args.cube_size, args.unit_gap, args.unit_gap_grow, args.unit_start)
+    if not args.unit_cone:
+        cube_units = util.find_units_to_split(
+            args.cnf, args.cube_size, args.unit_gap, args.unit_gap_grow, args.unit_start
+        )
+    else:
+        cube_units = util.find_units_to_split_cone(args.cnf, args.unit_count, args.unit_cone_size)
     hypercube = util.generate_hypercube(cube_units)
     procs = []
     for cube in hypercube:
@@ -46,6 +51,8 @@ if __name__ == "__main__":
     parser.add_argument("--unit-gap", dest="unit_gap", type=int, default=100)
     parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", type=int, default=1)
     parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
+    parser.add_argument("--unit-cone", dest="unit_cone", type=bool, action=argparse.BooleanOptionalAction)
+    parser.add_argument("--unit-cone-size", dest="unit_cone_size", type=int, default=5000)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()

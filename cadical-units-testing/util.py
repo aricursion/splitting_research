@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import subprocess
 import time
-import os
 from itertools import product
 
 executor_sat = None
@@ -42,6 +41,24 @@ def run_cadical_units(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_gro
     return p
 
 
+def run_cadical_units_cone(cnf_loc: str, unit_count: int, unit_cone_size: int):
+    p = subprocess.run(
+        [
+            "./cadical-units",
+            cnf_loc,
+            "-q",
+            "/dev/null",
+            "--unitprint",
+            f"--unitcount={unit_count}",
+            "--unitcone",
+            f"--unitconesize={unit_cone_size}",
+            "--lrat",
+        ],
+        stdout=subprocess.PIPE,
+    )
+    return p
+
+
 # no timeout by default
 def run_cadical(cnf_loc: str, timeout=-1):
     try:
@@ -57,6 +74,20 @@ def run_cadical(cnf_loc: str, timeout=-1):
 
 def find_units_to_split(cnf_loc: str, unit_count: int, unit_gap: int, unit_gap_grow: int, unit_start: int) -> list[int]:
     submitted_proc = executor_sat.submit(run_cadical_units, cnf_loc, unit_count, unit_gap, unit_gap_grow, unit_start)
+    output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
+
+    output_lines = output.split("\n")
+    out_units = []
+    for line in output_lines:
+        if "s SATISFIABLE" in line or "s UNSATISFIABLE" in line:
+            continue
+        out_units.append(abs(parse_unit_line(line)))
+
+    return out_units
+
+
+def find_units_to_split_cone(cnf_loc: str, unit_count: int, unit_cone_size: int) -> list[int]:
+    submitted_proc = executor_sat.submit(run_cadical_units_cone, cnf_loc, unit_count, unit_cone_size)
     output = str(submitted_proc.result().stdout.decode("utf-8")).strip()
 
     output_lines = output.split("\n")
