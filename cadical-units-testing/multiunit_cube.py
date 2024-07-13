@@ -7,9 +7,13 @@ import os
 
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
-    out += "unit-gap: {} ".format(args.unit_gap)
-    out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
-    out += "unit-start: {} ".format(args.unit_start)
+    if not args.unit_cone:
+        out += "unit-gap: {} ".format(args.unit_gap)
+        out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
+        out += "unit-start: {} ".format(args.unit_start)
+    else:
+        out += "unit-cone "
+        out += "unit-cone-size: {} ".format(args.unit_cone_size)
     return out
 
 

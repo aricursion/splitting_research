@@ -7,7 +7,7 @@ from util import CadicalResult, add_cube_to_cnf, find_units_to_split, run_cadica
 import util
 
 
-def find_tree(args, current_cube: list[int], time_cutoff: float, prev_learned: int):
+def find_tree(args, current_cube: list[int], min_threshold: float, prev_learned: int):
     log_file = open(args.all_log, "a")
     cnf_loc = str(args.cnf)
 
@@ -20,6 +20,7 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_learned: i
     else:
         splitting_units = util.find_units_to_split_cone(current_cube_cnf_loc, args.unit_count, args.unit_cone_size)
     unit_find_time = time.time() - cur
+    os.remove(current_cube_cnf_loc)
 
     if len(splitting_units) == 0:
         return
@@ -37,11 +38,11 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_learned: i
         new_neg_cube = current_cube + [-unit]
         pos_cnf_loc = add_cube_to_cnf(cnf_loc, new_pos_cube)
         neg_cnf_loc = add_cube_to_cnf(cnf_loc, new_neg_cube)
-        pos_proc = util.executor_sat.submit(run_cadical, pos_cnf_loc, prev_learned)
-        neg_proc = util.executor_sat.submit(run_cadical, neg_cnf_loc, prev_learned)
-        procs.append((pos_proc, neg_proc, new_pos_cube, new_neg_cube))
+        pos_proc = util.executor_sat.submit(run_cadical, pos_cnf_loc)
+        neg_proc = util.executor_sat.submit(run_cadical, neg_cnf_loc)
+        procs.append((pos_proc, neg_proc, new_pos_cube, new_neg_cube, pos_cnf_loc, neg_cnf_loc))
 
-    for pos_proc, neg_proc, npc, nnc in procs:
+    for pos_proc, neg_proc, npc, nnc, pcl, ncl in procs:
         if pos_proc.result() == "FAILURE":
             pos_cadical_result = CadicalResult(9999, 9999, 9999)
         else:
@@ -74,16 +75,18 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_learned: i
             )
         )
         log_file.flush()
+        os.remove(pcl)
+        os.remove(ncl)
     log_file.close()
 
-    time_metrics = {var: max(res1.time, res2.time) for (var, (res1, res2)) in metrics.items()}
-    best_splitting_var = min(time_metrics, key=time_metrics.get)
+    learned_metrics = {var: max(res1.learned, res2.learned) for (var, (res1, res2)) in metrics.items()}
+    best_splitting_var = min(learned_metrics, key=learned_metrics.get)
     best_pos_metric, best_neg_metric = metrics[best_splitting_var]
     best_pos_learned = best_pos_metric.learned
     best_neg_learned = best_neg_metric.learned
 
-    best_max_time = max(best_pos_learned, best_neg_learned)
-    if best_max_time >= 0.9 * prev_learned:
+    best_max_learned = max(best_pos_learned, best_neg_learned)
+    if best_max_learned >= 0.9 * prev_learned:
         return
 
     next_pos_cube = current_cube + [best_splitting_var]
@@ -105,18 +108,22 @@ def find_tree(args, current_cube: list[int], time_cutoff: float, prev_learned: i
     log_file.flush()
     log_file.close()
 
-    if best_pos_learned > time_cutoff:
-        find_tree(args, next_pos_cube, time_cutoff, best_pos_learned)
+    if best_pos_learned > min_threshold:
+        find_tree(args, next_pos_cube, min_threshold, best_pos_learned)
 
-    if best_neg_learned > time_cutoff:
-        find_tree(args, next_neg_cube, time_cutoff, best_neg_learned)
+    if best_neg_learned > min_threshold:
+        find_tree(args, next_neg_cube, min_threshold, best_neg_learned)
 
 
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
-    out += "unit-gap: {} ".format(args.unit_gap)
-    out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
-    out += "unit-start: {} ".format(args.unit_start)
+    if not args.unit_cone:
+        out += "unit-gap: {} ".format(args.unit_gap)
+        out += "unit-gap-grow: {} ".format(args.unit_gap_grow)
+        out += "unit-start: {} ".format(args.unit_start)
+    else:
+        out += "unit-cone "
+        out += "unit-cone-size: {} ".format(args.unit_cone)
     return out
 
 
@@ -129,8 +136,8 @@ if __name__ == "__main__":
     parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
     parser.add_argument("--unit-cone", dest="unit_cone", type=bool, action=argparse.BooleanOptionalAction)
     parser.add_argument("--unit-cone-size", dest="unit_cone_size", type=int, default=5000)
-    parser.add_argument("--max-timeout", dest="max_timeout", type=int, default=2e5)
-    parser.add_argument("--min-time", dest="min_time", type=int, default=0)
+    parser.add_argument("--max-threshold", dest="max_threshold", type=int, default=2e5)
+    parser.add_argument("--min-threshold", dest="min_threshold", type=int, default=0)
     parser.add_argument("--all-log", dest="all_log", required=True)
     parser.add_argument("--best-log", dest="best_log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
@@ -150,4 +157,4 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_tree(args, [], args.min_time, args.max_timeout)
+    find_tree(args, [], args.min_threshold, args.max_threshold)
