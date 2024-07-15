@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 import subprocess
+from concurrent.futures import ProcessPoolExecutor
 import time
 from itertools import product
 import os
 
-executor_sat = None
+executor_sat: ProcessPoolExecutor
 
 
 @dataclass

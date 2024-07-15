@@ -31,7 +31,7 @@ def find_tree(args, current_cube: list[int], min_threshold: float, prev_learned:
     print(splitting_units)
     procs = []
     metrics = {}
-    for i, unit in enumerate(splitting_units):
+    for _, unit in enumerate(splitting_units):
         if unit in current_cube or -unit in current_cube:
             continue
         new_pos_cube = current_cube + [unit]
@@ -79,8 +79,16 @@ def find_tree(args, current_cube: list[int], min_threshold: float, prev_learned:
         os.remove(ncl)
     log_file.close()
 
-    learned_metrics = {var: max(res1.learned, res2.learned) for (var, (res1, res2)) in metrics.items()}
-    best_splitting_var = min(learned_metrics, key=learned_metrics.get)
+    consolidated_metrics: dict[int, int] = {var: max(res1.learned, res2.learned) for (var, (res1, res2)) in metrics.items()}
+
+    # modify for min/max etc.
+    best_splitting_var = 0
+    best_metric = 0
+    for (var, metric) in consolidated_metrics.items():
+        if  metric > best_metric:
+            best_splitting_var = var
+            best_metric = metric
+
     best_pos_metric, best_neg_metric = metrics[best_splitting_var]
     best_pos_learned = best_pos_metric.learned
     best_neg_learned = best_neg_metric.learned

@@ -29,7 +29,7 @@ def find_hypercube(args):
     procs = []
     for cube in hypercube:
         new_cnf_loc = util.add_cube_to_cnf(args.cnf, cube)
-        proc = util.executor_sat.submit(util.run_cadical, new_cnf_loc, 999999)
+        proc = util.executor_sat.submit(util.run_cadical, new_cnf_loc, 1000000)
         procs.append((proc, cube))
     for proc, cube in procs:
         try:
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     parser.add_argument("--unit-gapgrow", dest="unit_gap_grow", type=int, default=1)
     parser.add_argument("--unit-start", dest="unit_start", type=int, default=5000)
     parser.add_argument("--unit-cone", dest="unit_cone", type=bool, action=argparse.BooleanOptionalAction)
-    parser.add_argument("--unit-cone-size", dest="unit_cone_size", type=int, default=5000)
+    parser.add_argument("--unit-cone-size", dest="unit_cone_size", type=int, default=1000)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
