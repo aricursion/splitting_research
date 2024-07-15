@@ -34,8 +34,13 @@ def find_cube(args, depth, current_cube):
     log_file.close()
     os.remove(new_cnf_loc)
     if depth < args.cube_size:
-        find_cube(args, depth + 1, current_cube + [new_lit])
-        find_cube(args, depth + 1, current_cube + [-new_lit])
+        print("here")
+        p1 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [new_lit])
+        p2 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [-new_lit])
+
+        print(p1.result().stdout)
+        print(p2.result().stdout)
+        
     else:
         final_hc.append(current_cube + [new_lit])
         final_hc.append(current_cube + [-new_lit])

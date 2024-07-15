@@ -3,8 +3,9 @@ import os
 import subprocess
 import time
 from itertools import product
+from concurrent.futures import ProcessPoolExecutor
 
-executor_sat = None
+executor_sat: ProcessPoolExecutor = None
 
 
 @dataclass

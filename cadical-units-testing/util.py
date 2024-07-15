@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import subprocess
 import time
 from itertools import product
+import os
 
 executor_sat = None
 
@@ -141,3 +142,27 @@ def generate_hypercube(cube):
     pos_neg_pairs = [(num, -num) for num in cube]
     combinations = list(product(*pos_neg_pairs))
     return list(map(list, combinations))
+
+def run_hypercube(cnf_loc, hc, log_file_loc, timeout=99999):
+    log_file = open(log_file_loc, "a")
+    procs = []
+    for cube in hc:
+        new_cnf_loc = add_cube_to_cnf(cnf_loc, cube)
+        proc = executor_sat.submit(run_cadical, new_cnf_loc, timeout)
+        procs.append((proc, new_cnf_loc, cube))
+    t = 0
+    for proc, loc, cube in procs:
+        output = str(proc.result().stdout.decode("utf-8").strip())
+        cadical_result = cadical_parse_results(output)
+
+        log_file.write(
+            ",".join(list(map(str, cube)))
+            + " time: {}, learned: {}, props: {}\n".format(
+                cadical_result.time, cadical_result.learned, cadical_result.props
+            )
+        )
+        log_file.flush()
+        t += cadical_result.time
+        os.remove(loc)
+    log_file.write("sum time: {:.2f}".format(t))
+    log_file.close()
