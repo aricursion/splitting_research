@@ -5,7 +5,7 @@ import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
 
-executor_sat: ProcessPoolExecutor = None
+executor_sat: ProcessPoolExecutor
 
 
 @dataclass
@@ -46,7 +46,7 @@ def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: i
 
 
 # no timeout by default
-def run_cadical(cnf_loc: str, timeout=-1):
+def run_cadical(cnf_loc: str, timeout: float =-1):
     try:
         if timeout > 0:
             p = subprocess.run(["cadical", cnf_loc], stdout=subprocess.PIPE, timeout=timeout)

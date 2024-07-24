@@ -80,13 +80,13 @@ def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_tim
         log_file.flush()
     log_file.close()
 
-    time_metrics = {var: max(res1.time, res2.time) for (var, (res1, res2)) in metrics.items()}
-    best_splitting_var = min(time_metrics, key=time_metrics.get)
+    learned_metrics = {var: max(res1.learned, res2.learned) for (var, (res1, res2)) in metrics.items()}
+    best_splitting_var = min(learned_metrics, key=learned_metrics.get)
     best_pos_metric, best_neg_metric = metrics[best_splitting_var]
-    best_pos_time = best_pos_metric.time
-    best_neg_time = best_neg_metric.time
+    best_pos_learned = best_pos_metric.learned
+    best_neg_learned = best_neg_metric.learned
 
-    best_max_time = max(best_pos_time, best_neg_time)
+    best_max_time = max(best_pos_learned, best_neg_learned)
     if best_max_time >= 0.9 * prev_time:
         return
 
@@ -109,11 +109,11 @@ def find_tree(args, current_cube: list[int], depth, time_cutoff: float, prev_tim
     log_file.flush()
     log_file.close()
 
-    if best_pos_time > time_cutoff:
-        find_tree(args, next_pos_cube, depth + 1, time_cutoff, best_pos_time)
+    if best_pos_learned > time_cutoff:
+        find_tree(args, next_pos_cube, depth + 1, time_cutoff, best_pos_learned)
 
-    if best_neg_time > time_cutoff:
-        find_tree(args, next_neg_cube, depth + 1, time_cutoff, best_neg_time)
+    if best_neg_learned > time_cutoff:
+        find_tree(args, next_neg_cube, depth + 1, time_cutoff, best_neg_learned)
 
 
 def config_to_string(args):
