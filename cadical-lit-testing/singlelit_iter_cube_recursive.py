@@ -20,11 +20,9 @@ def find_cube(args, depth, current_cube):
     start = time.time()
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
     try:
-        print("finding new lit")
         new_lit = util.find_lits_to_split(
             new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False
         )[0]
-        print("here2")
     except Exception:
         final_hc.append(current_cube)
         return
@@ -36,7 +34,6 @@ def find_cube(args, depth, current_cube):
     log_file.close()
     os.remove(new_cnf_loc)
     if depth < args.cube_size:
-        print("recursive call")
         find_cube(args, depth + 1, current_cube + [new_lit])
         find_cube(args, depth + 1, current_cube + [-new_lit])
         # p1 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [new_lit])
@@ -52,7 +49,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cnf", dest="cnf", required=True)
     parser.add_argument("--cube-size", dest="cube_size", type=int, required=True)
-    parser.add_argument("--lit-start", dest="lit_start", type=int, default=5000)
+    parser.add_argument("--lit-start", dest="lit_start", type=int, default=100000)
     parser.add_argument("--lit-start-dec", dest="lit_start_dec", type=int, default=0)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)

@@ -41,9 +41,7 @@ def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: i
     if lit_recent:
         cmd.append("--litrecent")
 
-    print("here0")
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
-    print("here1")
     return p
 
 
@@ -63,7 +61,6 @@ def run_cadical(cnf_loc: str, timeout: float =-1):
 def find_lits_to_split(
     cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool
 ) -> list[int]:
-    print("here -1")
     submitted_proc = executor_sat.submit(
         run_cadical_lits, cnf_loc, lit_count, lit_gap, lit_gap_grow, lit_start, lit_recent
     )
@@ -122,12 +119,12 @@ def generate_hypercube(cube):
     return list(map(list, combinations))
 
 
-def run_hypercube_from_cube(cnf_loc, cube, log_file_loc, timeout=99999):
+def run_hypercube_from_cube(cnf_loc, cube, log_file_loc, timeout=-1):
     hc = generate_hypercube(cube)
     run_hypercube(cnf_loc, hc, log_file_loc, timeout=timeout)
 
 
-def run_hypercube(cnf_loc, hc, log_file_loc, timeout=99999):
+def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
     log_file = open(log_file_loc, "a")
     procs = []
     for cube in hc:
