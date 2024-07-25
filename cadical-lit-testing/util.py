@@ -41,7 +41,9 @@ def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: i
     if lit_recent:
         cmd.append("--litrecent")
 
+    print("here0")
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
+    print("here1")
     return p
 
 
@@ -61,6 +63,7 @@ def run_cadical(cnf_loc: str, timeout: float =-1):
 def find_lits_to_split(
     cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool
 ) -> list[int]:
+    print("here -1")
     submitted_proc = executor_sat.submit(
         run_cadical_lits, cnf_loc, lit_count, lit_gap, lit_gap_grow, lit_start, lit_recent
     )

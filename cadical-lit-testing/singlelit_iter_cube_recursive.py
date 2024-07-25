@@ -13,16 +13,18 @@ def config_to_string(args):
 
 
 final_hc = []
-
+exectuor_rec = ProcessPoolExecutor(max_workers=6)
 
 def find_cube(args, depth, current_cube):
     log_file = open(args.log, "a")
     start = time.time()
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
     try:
+        print("finding new lit")
         new_lit = util.find_lits_to_split(
             new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False
         )[0]
+        print("here2")
     except Exception:
         final_hc.append(current_cube)
         return
@@ -34,13 +36,13 @@ def find_cube(args, depth, current_cube):
     log_file.close()
     os.remove(new_cnf_loc)
     if depth < args.cube_size:
-        print("here")
-        p1 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [new_lit])
-        p2 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [-new_lit])
-
-        print(p1.result().stdout)
-        print(p2.result().stdout)
-        
+        print("recursive call")
+        find_cube(args, depth + 1, current_cube + [new_lit])
+        find_cube(args, depth + 1, current_cube + [-new_lit])
+        # p1 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [new_lit])
+        # p2 = util.executor_sat.submit(find_cube, args, depth + 1, current_cube + [-new_lit])
+        # print(p1.result().stdout.decode("utf-8"))
+        # print(p2.result().stdout.decode("utf-8"))
     else:
         final_hc.append(current_cube + [new_lit])
         final_hc.append(current_cube + [-new_lit])

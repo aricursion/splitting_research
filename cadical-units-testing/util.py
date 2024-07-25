@@ -14,6 +14,8 @@ class CadicalResult:
     learned: int
     props: int
 
+def cadical_result_to_string(c: CadicalResult):
+    return "time: {}, learned: {}, props: {}".format(c.time, c.learned, c.props)
 
 @dataclass
 class CnfHeader:
@@ -143,6 +145,7 @@ def generate_hypercube(cube):
     pos_neg_pairs = [(num, -num) for num in cube]
     combinations = list(product(*pos_neg_pairs))
     return list(map(list, combinations))
+
 
 def run_hypercube(cnf_loc, hc, log_file_loc, timeout=99999):
     log_file = open(log_file_loc, "a")
