@@ -1,3 +1,6 @@
+"""
+find a bunch of lits, then find the best one, and tree 
+"""
 from concurrent.futures import ProcessPoolExecutor
 import argparse
 import time

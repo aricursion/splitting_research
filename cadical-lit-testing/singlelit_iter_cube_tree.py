@@ -44,6 +44,35 @@ def find_cube(args, depth, current_cube):
         final_hc.append(current_cube + [new_lit])
         final_hc.append(current_cube + [-new_lit])
 
+def find_cube_par(args):
+    result = []
+    stack = [[]]
+    # log_file = open(args.log, "a")
+    while stack != []:
+        procs = []
+        while stack != []:
+            current_cube = stack.pop()
+            cnf = util.add_cube_to_cnf(args.cnf, current_cube)
+            proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
+            procs.append((proc, current_cube))
+        for proc, cc in procs:
+            output = proc.result().stdout.decode("utf-8").strip()
+            if "SATISFIABLE" in output:
+                result.append(cc)
+                continue
+            else:
+                split_lit = util.parse_lit_line(output)
+                if len(cc) + 1 < args.cube_size:
+                    stack.append(cc + [split_lit])
+                    stack.append(cc + [-split_lit])
+                else:
+                    result.append(cc + [split_lit])
+                    result.append(cc + [-split_lit])
+    return result
+
+        
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -66,6 +95,7 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
-    find_cube(args, 1, [])
+    # find_cube(args, 1, [])
+    final_hc = find_cube_par(args)
     print(final_hc)
     util.run_hypercube(args.cnf, final_hc, args.log)
