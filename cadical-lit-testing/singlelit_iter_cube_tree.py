@@ -47,7 +47,7 @@ def find_cube(args, depth, current_cube):
 def find_cube_par(args):
     result = []
     stack = [[]]
-    # log_file = open(args.log, "a")
+    log_file = open(args.log, "a")
     while stack != []:
         procs = []
         while stack != []:
@@ -61,13 +61,16 @@ def find_cube_par(args):
                 result.append(cc)
                 continue
             else:
-                split_lit = util.parse_lit_line(output)
+                (split_lit, time) = util.parse_lit_line_runtime(output)
+                log_file.write("Time finding lit: {:2f}\n".format(time))
+                log_file.flush()
                 if len(cc) + 1 < args.cube_size:
                     stack.append(cc + [split_lit])
                     stack.append(cc + [-split_lit])
                 else:
                     result.append(cc + [split_lit])
                     result.append(cc + [-split_lit])
+    log_file.close()
     return result
 
         
@@ -81,10 +84,11 @@ if __name__ == "__main__":
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=100000)
     parser.add_argument("--lit-start-dec", dest="lit_start_dec", type=int, default=0)
     parser.add_argument("--log", dest="log", required=True)
-    parser.add_argument("--procs", dest="procs", type=int, default=multiprocessing.cpu_count() - 2)
+    parser.add_argument("--cube-procs", dest="cube_procs", type=int, default=multiprocessing.cpu_count() - 2)
+    parser.add_argument("--solve-procs", dest="solve_procs", type=int, default=multiprocessing.cpu_count() - 2)
     args = parser.parse_args()
 
-    util.executor_sat = ProcessPoolExecutor(max_workers=args.procs)
+    util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
     os.makedirs("tmp", exist_ok=True)
     try:
         os.makedirs(os.path.dirname(args.log), exist_ok=True)
@@ -95,6 +99,8 @@ if __name__ == "__main__":
         f.write("# {}\n".format(config_to_string(args)))
         f.close()
 
+
+    util.executor_sat = ProcessPoolExecutor(max_workers=args.solve_procs)
     # find_cube(args, 1, [])
     final_hc = find_cube_par(args)
     print(final_hc)

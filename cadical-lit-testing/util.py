@@ -24,6 +24,8 @@ class CnfHeader:
 def parse_lit_line(line: str) -> int:
     return int(line.split(" ")[2])
 
+def parse_lit_line_runtime(line: str):
+    return (parse_lit_line(line), float(line.split("runtime:")[-1]))
 
 def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
     cmd = [
