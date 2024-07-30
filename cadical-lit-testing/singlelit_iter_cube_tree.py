@@ -1,3 +1,6 @@
+"""
+find a lit at level and recurse down tree
+"""
 import util
 from concurrent.futures import ProcessPoolExecutor
 import argparse
@@ -94,14 +97,15 @@ if __name__ == "__main__":
         os.makedirs(os.path.dirname(args.log), exist_ok=True)
     except Exception:
         pass
-    with open(args.log, "a") as f:
-        f.write("# cube log\n")
-        f.write("# {}\n".format(config_to_string(args)))
-        f.close()
-
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.solve_procs)
     # find_cube(args, 1, [])
     final_hc = find_cube_par(args)
+    with open(args.log, "a") as f:
+        f.write("# cube log\n")
+        f.write("# {}\n".format(config_to_string(args)))
+        for cube in final_hc:
+            f.write("cube: " + ",".join(map(str, cube)) + "\n")
+        f.close()
     print(final_hc)
     util.run_hypercube(args.cnf, final_hc, args.log)

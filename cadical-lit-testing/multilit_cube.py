@@ -1,3 +1,6 @@
+"""
+Find a number of lits and then hypercube
+"""
 import util
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor

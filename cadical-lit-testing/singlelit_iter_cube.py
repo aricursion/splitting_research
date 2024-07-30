@@ -1,3 +1,6 @@
+"""
+find lits along positive spine and hypercube
+"""
 import util
 from concurrent.futures import ProcessPoolExecutor
 import argparse
