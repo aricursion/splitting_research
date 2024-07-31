@@ -13,6 +13,8 @@ import os
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
     out += "lit-start: {} ".format(args.lit_start)
+    out += "batch-size: {} ".format(args.batch_size)
+    out += "samples: {} ".format(args.num_samples)
     return out
 
 
