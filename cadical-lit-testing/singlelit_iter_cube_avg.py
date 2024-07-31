@@ -1,5 +1,5 @@
 """
-tree, but if width of level > 8, then sample 8, find best literal, and use for entire layer
+tree, but partition layers and take samples, find best literal, and use for the partition
 """
 import util
 import random
