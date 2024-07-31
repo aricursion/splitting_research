@@ -64,7 +64,11 @@ def find_cube_par(args):
                 result.append(cc)
                 continue
             else:
-                (split_lit, time) = util.parse_lit_line_runtime(output)
+                lit_line = util.parse_lit_line_ext(output)
+                split_lit = lit_line.lit
+                time = lit_line.runtime
+                props = lit_line.propagations
+
                 log_file.write("Time finding lit: {:2f}\n".format(time))
                 log_file.flush()
                 if len(cc) + 1 < args.cube_size:

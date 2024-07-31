@@ -20,12 +20,20 @@ class CnfHeader:
     var_num: int
     clause_num: int
 
+@dataclass 
+class LitLine:
+    lit: int
+    runtime: float
+    props: int
 
 def parse_lit_line(line: str) -> int:
     return int(line.split(" ")[2])
 
-def parse_lit_line_runtime(line: str):
-    return (parse_lit_line(line), float(line.split("runtime:")[-1]))
+def parse_lit_line_ext(line: str):
+    runtime = float(line.split("#")[1].split("runtime:")[-1])
+    props = int(line.split("#")[2].split("props:")[-1])
+    return LitLine(parse_lit_line(line), runtime, props)
+
 
 def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
     cmd = [
