@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import shutil
 import os
 import subprocess
 import time
@@ -157,3 +158,15 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
         os.remove(loc)
     log_file.write("sum time: {:.2f}".format(t))
     log_file.close()
+
+def make_icnf(cnf_loc, cubes, icnf_loc):
+    cnf_file = open(cnf_loc, "r")
+    icnf_file = open(icnf_loc, "a")
+    cnf_file.readline()
+    icnf_file.write("p inccnf\n")
+    shutil.copyfileobj(cnf_file, icnf_file)
+    for cube in cubes:
+        icnf_file.write("a " + " ".join(map(str, cube)) + " 0\n")
+    cnf_file.close()
+    icnf_file.close()
+

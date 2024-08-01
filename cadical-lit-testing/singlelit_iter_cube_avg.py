@@ -95,9 +95,7 @@ if __name__ == "__main__":
 
     final_hc = find_cube_par(args)
     if args.icnf != None:
-        with open(args.icnf, "a") as f:
-            for cube in final_hc:
-                f.write("a " + " ".join(map(str, cube)) + "\n")
+        util.make_icnf(args.cnf, final_hc, args.icnf)
     print(final_hc)
     if not args.cube_only:
         util.run_hypercube(args.cnf, final_hc, args.log)
