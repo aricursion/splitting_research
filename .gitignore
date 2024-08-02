@@ -6,4 +6,5 @@ tmp/
 log/
 logs/
 notes/
+test/
 __pycache__/
