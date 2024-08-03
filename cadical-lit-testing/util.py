@@ -124,10 +124,13 @@ def cnf_parse_header(cnf_string: str):
     return CnfHeader(int(header[2]), int(header[3]))
 
 
-def add_cube_to_cnf(cnf_loc: str, cube: list[int]):
+def add_cube_to_cnf(cnf_loc: str, cube: list[int], tag=None):
     cnf_string = open(cnf_loc, "r").read()
+    if tag == None:
+        tag = (str(time.time()).split("."))[1]
+    else:
+        tag = str(tag)
 
-    tag = (str(time.time()).split("."))[1]
     header = cnf_parse_header(cnf_string)
     new_num_clauses = header.clause_num + len(cube)
 
