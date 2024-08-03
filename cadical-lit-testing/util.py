@@ -5,6 +5,7 @@ import subprocess
 import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
+import json
 
 executor_sat: ProcessPoolExecutor
 
@@ -34,6 +35,9 @@ def parse_lit_line_ext(line: str):
     runtime = float(line.split("#")[1].split("runtime:")[-1])
     props = int(line.split("#")[2].split("props:")[-1])
     return LitLine(parse_lit_line(line), runtime, props)
+
+def parse_lit_set(line: str):
+    return json.loads(line[1:])
 
 
 def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
