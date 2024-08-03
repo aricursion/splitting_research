@@ -5,7 +5,6 @@ import subprocess
 import time
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
-import json
 
 executor_sat: ProcessPoolExecutor
 
@@ -37,7 +36,7 @@ def parse_lit_line_ext(line: str):
     return LitLine(parse_lit_line(line), runtime, props)
 
 def parse_lit_set(line: str):
-    return json.loads(line[1:])
+    return eval(line[1:])
 
 
 def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
@@ -60,6 +59,22 @@ def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: i
     return p
 
 
+def run_cadical_litset(cnf_loc: str, lit_count: int, lit_start: int, lit_set_size:int):
+    cmd = [
+        "./cadical-lits",
+        cnf_loc,
+        "-q",
+        "/dev/null",
+        "--litprint",
+        "--litset",
+        f"--litcount={lit_count}",
+        f"--litstart={lit_start}",
+        f"--litsetsize={lit_set_size}",
+    ]
+
+    p = subprocess.run(cmd, stdout=subprocess.PIPE)
+    return p
+ 
 # no timeout by default
 def run_cadical(cnf_loc: str, timeout: float =-1):
     try:

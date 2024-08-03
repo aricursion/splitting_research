@@ -35,7 +35,7 @@ def find_cube_par(args):
                 samples = batch
             for sample in samples:
                 cnf = util.add_cube_to_cnf(args.cnf, sample)
-                proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
+                proc = util.executor_sat.submit(util.run_cadical_litset, cnf, 1, args.lit_start, args.lit_set_size)
                 procs.append((proc, sample, i))
         batch_data = {}
         for (proc, cc, i) in procs:
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     parser.add_argument("--cnf", dest="cnf", required=True)
     parser.add_argument("--cube-size", dest="cube_size", type=int, required=True)
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=100000)
-    parser.add_argument("--lit-start-dec", dest="lit_start_dec", type=int, default=0)
+    parser.add_argument("--lit-set-size", dest="lit_set_size", type=int, default=5)
     parser.add_argument("--log", dest="log", required=True)
     parser.add_argument("--cube-procs", dest="cube_procs", type=int, default=multiprocessing.cpu_count() - 2)
     parser.add_argument("--solve-procs", dest="solve_procs", type=int, default=multiprocessing.cpu_count() - 2)
