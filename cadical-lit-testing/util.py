@@ -160,8 +160,8 @@ def run_hypercube_from_cube(cnf_loc, cube, log_file_loc, timeout=-1):
 def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
     log_file = open(log_file_loc, "a")
     procs = []
-    for cube in hc:
-        new_cnf_loc = add_cube_to_cnf(cnf_loc, cube)
+    for i, cube in enumerate(hc):
+        new_cnf_loc = add_cube_to_cnf(cnf_loc, cube, i)
         proc = executor_sat.submit(run_cadical, new_cnf_loc, timeout)
         procs.append((proc, new_cnf_loc, cube))
     t = 0
