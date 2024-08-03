@@ -57,11 +57,12 @@ def find_cube_par(args):
             current_cube = stack.pop()
             cnf = util.add_cube_to_cnf(args.cnf, current_cube)
             proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
-            procs.append((proc, current_cube))
-        for proc, cc in procs:
+            procs.append((proc, current_cube, cnf))
+        for proc, cc, cnf in procs:
             output = proc.result().stdout.decode("utf-8").strip()
             if "SATISFIABLE" in output:
                 result.append(cc)
+                os.remove(cnf)
                 continue
             else:
                 lit_line = util.parse_lit_line_ext(output)
@@ -76,6 +77,7 @@ def find_cube_par(args):
                 else:
                     result.append(cc + [split_lit])
                     result.append(cc + [-split_lit])
+            os.remove(cnf)
     log_file.close()
     return result
 
