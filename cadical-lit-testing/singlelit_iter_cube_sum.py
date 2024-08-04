@@ -36,10 +36,11 @@ def find_cube_par(args):
             for sample in samples:
                 cnf = util.add_cube_to_cnf(args.cnf, sample)
                 proc = util.executor_sat.submit(util.run_cadical_litset, cnf, 1, args.lit_start, args.lit_set_size)
-                procs.append((proc, sample, i))
+                procs.append((proc, sample, cnf, i))
         batch_data = {}
-        for (proc, cc, i) in procs:
+        for (proc, cc, cnf, i) in procs:
             output = proc.result().stdout.decode("utf-8").strip()
+            os.remove(cnf)
             lit_count_dict = util.parse_lit_set(output)
             if i in batch_data:
                 batch_data[i] = batch_data[i] + [(cc, lit_count_dict)]
