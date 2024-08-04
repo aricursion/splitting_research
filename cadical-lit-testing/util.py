@@ -87,6 +87,12 @@ def run_cadical(cnf_loc: str, timeout: float =-1):
 
     return p
 
+def run_cadical_cube(base_cnf_loc, cube):
+    new_cnf_loc = add_cube_to_cnf(base_cnf_loc, cube)
+    p = run_cadical(new_cnf_loc)
+    os.remove(new_cnf_loc)
+    return p
+
 
 def find_lits_to_split(
     cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool
@@ -161,11 +167,10 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
     log_file = open(log_file_loc, "a")
     procs = []
     for i, cube in enumerate(hc):
-        new_cnf_loc = add_cube_to_cnf(cnf_loc, cube, i)
-        proc = executor_sat.submit(run_cadical, new_cnf_loc, timeout)
-        procs.append((proc, new_cnf_loc, cube))
+        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube)
+        procs.append((proc, cube))
     t = 0
-    for proc, loc, cube in procs:
+    for proc, cube in procs:
         output = str(proc.result().stdout.decode("utf-8").strip())
         cadical_result = cadical_parse_results(output)
 
@@ -177,7 +182,6 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
         )
         log_file.flush()
         t += cadical_result.time
-        os.remove(loc)
     log_file.write("sum time: {:.2f}".format(t))
     log_file.close()
 
