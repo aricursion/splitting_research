@@ -92,12 +92,15 @@ if __name__ == "__main__":
     parser.add_argument("--lit-start", dest="lit_start", type=int, default=100000)
     parser.add_argument("--lit-start-dec", dest="lit_start_dec", type=int, default=0)
     parser.add_argument("--log", dest="log", required=True)
+    parser.add_argument("--icnf", dest="icnf", default=None)
+    parser.add_argument("--tmp-dir", dest="tmp_dir", default="tmp")
     parser.add_argument("--cube-procs", dest="cube_procs", type=int, default=multiprocessing.cpu_count() - 2)
     parser.add_argument("--solve-procs", dest="solve_procs", type=int, default=multiprocessing.cpu_count() - 2)
+    parser.add_argument("--cube-only", dest="cube_only", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
-    os.makedirs("tmp", exist_ok=True)
+    os.makedirs(args.tmp_dir, exist_ok=True)
     try:
         os.makedirs(os.path.dirname(args.log), exist_ok=True)
     except Exception:
@@ -112,5 +115,7 @@ if __name__ == "__main__":
         for cube in final_hc:
             f.write("cube: " + ",".join(map(str, cube)) + "\n")
         f.close()
-    print(final_hc)
-    util.run_hypercube(args.cnf, final_hc, args.log)
+    if args.icnf != None:
+        util.make_icnf(final_hc, args.icnf)
+    if not args.cube_only:
+        util.run_hypercube(args.cnf, final_hc, args.log, tmp=args.tmp_dir)

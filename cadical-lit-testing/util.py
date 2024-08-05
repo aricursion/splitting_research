@@ -87,8 +87,8 @@ def run_cadical(cnf_loc: str, timeout: float =-1):
 
     return p
 
-def run_cadical_cube(base_cnf_loc, cube):
-    new_cnf_loc = add_cube_to_cnf(base_cnf_loc, cube)
+def run_cadical_cube(base_cnf_loc, cube, tmp="tmp"):
+    new_cnf_loc = add_cube_to_cnf(base_cnf_loc, cube, tmp)
     p = run_cadical(new_cnf_loc)
     os.remove(new_cnf_loc)
     return p
@@ -130,7 +130,7 @@ def cnf_parse_header(cnf_string: str):
     return CnfHeader(int(header[2]), int(header[3]))
 
 
-def add_cube_to_cnf(cnf_loc: str, cube: list[int], tag=None):
+def add_cube_to_cnf(cnf_loc: str, cube: list[int], tmp="tmp", tag=None):
     cnf_string = open(cnf_loc, "r").read()
     if tag == None:
         tag = (str(time.time()).split("."))[1]
@@ -146,10 +146,10 @@ def add_cube_to_cnf(cnf_loc: str, cube: list[int], tag=None):
     for lit in cube:
         out += f"{lit} 0\n"
 
-    f = open(f"tmp/{tag}.cnf", "w+")
+    f = open(os.path.join(tmp, f"{tag}.cnf"), "w+")
     f.write(out)
     f.close()
-    return f"tmp/{tag}.cnf"
+    return os.path.join(tmp, f"{tag}.cnf")
 
 
 def generate_hypercube(cube):
@@ -163,11 +163,11 @@ def run_hypercube_from_cube(cnf_loc, cube, log_file_loc, timeout=-1):
     run_hypercube(cnf_loc, hc, log_file_loc, timeout=timeout)
 
 
-def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
+def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1, tmp="tmp"):
     log_file = open(log_file_loc, "a")
     procs = []
     for i, cube in enumerate(hc):
-        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube)
+        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube, tmp)
         procs.append((proc, cube))
     t = 0
     for proc, cube in procs:
@@ -185,14 +185,9 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1):
     log_file.write("sum time: {:.2f}".format(t))
     log_file.close()
 
-def make_icnf(cnf_loc, cubes, icnf_loc):
-    cnf_file = open(cnf_loc, "r")
+def make_icnf(cubes, icnf_loc):
     icnf_file = open(icnf_loc, "a")
-    cnf_file.readline()
-    icnf_file.write("p inccnf\n")
-    shutil.copyfileobj(cnf_file, icnf_file)
     for cube in cubes:
         icnf_file.write("a " + " ".join(map(str, cube)) + " 0\n")
-    cnf_file.close()
     icnf_file.close()
 
