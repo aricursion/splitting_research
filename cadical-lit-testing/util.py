@@ -167,7 +167,7 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1, tmp="tmp"):
     log_file = open(log_file_loc, "a")
     procs = []
     for i, cube in enumerate(hc):
-        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube, tmp, tag=i)
+        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube, tmp)
         procs.append((proc, cube))
     t = 0
     for proc, cube in procs:
