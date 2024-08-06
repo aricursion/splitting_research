@@ -56,7 +56,7 @@ def find_cube_par(args):
         procs = []
         while stack != []:
             current_cube = stack.pop()
-            cnf = util.add_cube_to_cnf(args.cnf, current_cube, tmp=args.tmp_dir, tag="foo_" + str(counter))
+            cnf = util.add_cube_to_cnf(args.cnf, current_cube, tmp=args.tmp_dir)
             counter += 1
             proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
             procs.append((proc, current_cube, cnf))
