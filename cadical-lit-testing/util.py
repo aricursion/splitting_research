@@ -185,6 +185,7 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1, tmp="tmp"):
     log_file.write("sum time: {:.2f}".format(t))
     log_file.close()
 
+
 def make_icnf(cubes, icnf_loc):
     icnf_file = open(icnf_loc, "a")
     for cube in cubes:
