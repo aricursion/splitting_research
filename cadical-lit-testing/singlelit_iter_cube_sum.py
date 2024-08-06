@@ -34,7 +34,7 @@ def find_cube_par(args):
             else:
                 samples = batch
             for sample in samples:
-                cnf = util.add_cube_to_cnf(args.cnf, sample)
+                cnf = util.add_cube_to_cnf(args.cnf, sample, tmp=args.tmp_dir)
                 proc = util.executor_sat.submit(util.run_cadical_litset, cnf, 1, args.lit_start, args.lit_set_size)
                 procs.append((proc, sample, cnf, i))
         batch_data = {}
@@ -83,10 +83,11 @@ if __name__ == "__main__":
     parser.add_argument("--samples", dest="num_samples", type=int, default=8)
     parser.add_argument("--icnf", dest="icnf", type=str, default=None)
     parser.add_argument("--cube-only", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--tmp-dir", default="tmp")
     args = parser.parse_args()
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
-    os.makedirs("tmp", exist_ok=True)
+    os.makedirs(args.tmp_dir, exist_ok=True)
     try:
         os.makedirs(os.path.dirname(args.log), exist_ok=True)
     except Exception:
@@ -103,4 +104,4 @@ if __name__ == "__main__":
         util.make_icnf(final_hc, args.icnf)
     print(final_hc)
     if not args.cube_only:
-        util.run_hypercube(args.cnf, final_hc, args.log)
+        util.run_hypercube(args.cnf, final_hc, args.log, tmp=args.tmp_dir)

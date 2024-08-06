@@ -21,7 +21,7 @@ exectuor_rec = ProcessPoolExecutor(max_workers=6)
 def find_cube(args, depth, current_cube):
     log_file = open(args.log, "a")
     start = time.time()
-    new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube)
+    new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube, args.tmp_dir)
     try:
         new_lit = util.find_lits_to_split(
             new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False
@@ -55,7 +55,7 @@ def find_cube_par(args):
         procs = []
         while stack != []:
             current_cube = stack.pop()
-            cnf = util.add_cube_to_cnf(args.cnf, current_cube)
+            cnf = util.add_cube_to_cnf(args.cnf, current_cube, args.tmp_dir)
             proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
             procs.append((proc, current_cube, cnf))
         for proc, cc, cnf in procs:
