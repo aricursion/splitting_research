@@ -36,7 +36,8 @@ if __name__ == "__main__":
 
     util.run_hypercube(args.cnf, hc, args.log,tmp=args.tmp_dir)
 
-
+    if args.icnf == None:
+        os.remove(icnf)
 
 
 
