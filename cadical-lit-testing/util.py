@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-import shutil
 import os
 import subprocess
-import time
+import random
+import string
 from itertools import product
 from concurrent.futures import ProcessPoolExecutor
 
@@ -133,7 +133,7 @@ def cnf_parse_header(cnf_string: str):
 def add_cube_to_cnf(cnf_loc: str, cube: list[int], tmp="tmp", tag=None):
     cnf_string = open(cnf_loc, "r").read()
     if tag == None:
-        tag = (str(time.time()).split("."))[1]
+        tag = "".join(random.choices(string.ascii_letters, k=20))
     else:
         tag = str(tag)
 
