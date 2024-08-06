@@ -87,8 +87,8 @@ def run_cadical(cnf_loc: str, timeout: float =-1):
 
     return p
 
-def run_cadical_cube(base_cnf_loc, cube, tmp="tmp"):
-    new_cnf_loc = add_cube_to_cnf(base_cnf_loc, cube, tmp)
+def run_cadical_cube(base_cnf_loc, cube, tmp="tmp", tag = None):
+    new_cnf_loc = add_cube_to_cnf(base_cnf_loc, cube, tmp, tag)
     p = run_cadical(new_cnf_loc)
     os.remove(new_cnf_loc)
     return p
@@ -167,7 +167,7 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1, tmp="tmp"):
     log_file = open(log_file_loc, "a")
     procs = []
     for i, cube in enumerate(hc):
-        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube, tmp)
+        proc = executor_sat.submit(run_cadical_cube, cnf_loc, cube, tmp, tag=i)
         procs.append((proc, cube))
     t = 0
     for proc, cube in procs:
