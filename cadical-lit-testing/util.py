@@ -78,6 +78,7 @@ def run_cadical_litset(cnf_loc: str, lit_count: int, lit_start: int, lit_set_siz
         f"--litcount={lit_count}",
         f"--litstart={lit_start}",
         f"--litsetsize={lit_set_size}",
+        "--litprintextra"
     ]
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
