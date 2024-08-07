@@ -38,6 +38,14 @@ def parse_lit_line_ext(line: str):
 def parse_lit_set(line: str):
     return eval(line[1:])
 
+def parse_lit_set_ext(line: str):
+    parts = line.split("time:")
+    set_string = parts[0][1:]
+    time = float(parts[1])
+    return (eval(set_string), time)
+
+
+
 
 def run_cadical_lits(cnf_loc: str, lit_count: int, lit_gap: int, lit_gap_grow: int, lit_start: int, lit_recent: bool):
     cmd = [
