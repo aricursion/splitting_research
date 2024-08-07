@@ -42,7 +42,7 @@ def find_cube_par(args):
             output = proc.result().stdout.decode("utf-8").strip()
             os.remove(cnf)
             lit_count_dict, time = util.parse_lit_set_ext(output)
-            log_file.write("cubing time: {time}\n")
+            log_file.write(f"cubing time: {time}\n")
             log_file.flush()
             if i in batch_data:
                 batch_data[i] = batch_data[i] + [(cc, lit_count_dict)]
