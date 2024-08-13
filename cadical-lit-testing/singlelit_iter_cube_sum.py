@@ -119,7 +119,6 @@ if __name__ == "__main__":
     except Exception:
         pass
 
-    util.executor_sat = ProcessPoolExecutor(max_workers=args.solve_procs)
     with open(args.log, "a") as f:
         f.write("# cube log\n")
         f.write("# {}\n".format(config_to_string(args)))
@@ -129,5 +128,7 @@ if __name__ == "__main__":
     if args.icnf != None:
         util.make_icnf(final_hc, args.icnf)
     print(final_hc)
+
+    util.executor_sat = ProcessPoolExecutor(max_workers=args.solve_procs)
     if not args.cube_only:
         util.run_hypercube(args.cnf, final_hc, args.log, tmp=args.tmp_dir)
