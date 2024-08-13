@@ -24,7 +24,7 @@ def find_cube(args, depth, current_cube):
     new_cnf_loc = util.add_cube_to_cnf(args.cnf, current_cube, args.tmp_dir)
     try:
         new_lit = util.find_lits_to_split(
-            new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False
+            new_cnf_loc, 1, 0, 0, args.lit_start - args.lit_start_dec * (depth - 1), False, args.mode
         )[0]
     except Exception:
         final_hc.append(current_cube)
@@ -58,7 +58,7 @@ def find_cube_par(args):
             current_cube = stack.pop()
             cnf = util.add_cube_to_cnf(args.cnf, current_cube, tmp=args.tmp_dir)
             counter += 1
-            proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False)
+            proc = util.executor_sat.submit(util.run_cadical_lits, cnf, 1, 0, 0, args.lit_start, False, args.mode)
             procs.append((proc, current_cube, cnf))
         for proc, cc, cnf in procs:
             output = proc.result().stdout.decode("utf-8").strip()
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     parser.add_argument("--cube-procs", dest="cube_procs", type=int, default=multiprocessing.cpu_count() - 2)
     parser.add_argument("--solve-procs", dest="solve_procs", type=int, default=multiprocessing.cpu_count() - 2)
     parser.add_argument("--cube-only", dest="cube_only", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--mode", dest="mode", type=int, default=0)
     args = parser.parse_args()
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
