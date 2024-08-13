@@ -12,6 +12,7 @@ import time
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
     out += "lit-start: {} ".format(args.lit_start)
+    out +="mode: {} ".format(args.mode)
     return out
 
 

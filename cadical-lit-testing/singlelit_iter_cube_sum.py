@@ -16,6 +16,7 @@ def config_to_string(args):
     out += "lit-start: {} ".format(args.lit_start)
     out += "batch-size: {} ".format(args.batch_size)
     out += "samples: {} ".format(args.num_samples)
+    out += "mode: {}".format(args.mode)
     return out
 
 
