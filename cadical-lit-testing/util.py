@@ -46,8 +46,13 @@ def parse_lit_set(line: str):
 def parse_lit_set_ext(line: str):
     parts = line.split("time:")
     set_string = parts[0][1:]
-    time = float(parts[1])
-    return (eval(set_string), time)
+    try:
+        time = float(parts[1])
+        return (eval(set_string), time)
+    except:
+        print("Error")
+        print(line)
+        exit(1)
 
 
 def run_cadical_lits(
@@ -235,10 +240,10 @@ def run_hypercube(cnf_loc, hc, log_file_loc, timeout=-1, tmp="tmp"):
         )
         log_file.flush()
         times.append(cadical_result.time)
-    log_file.write("c solving stats")
-    log_file.write("c sum time: {:.2f}".format(sum(times)))
-    log_file.write("c max time: {:.2f}".format(max(times)))
-    log_file.write("c avg time: {:.2f}".format(sum(times) / len(times)))
+    log_file.write("c solving stats\n")
+    log_file.write("c sum time: {:.2f}\n".format(sum(times)))
+    log_file.write("c max time: {:.2f}\n".format(max(times)))
+    log_file.write("c avg time: {:.2f}\n".format(sum(times) / len(times)))
     log_file.flush()
     log_file.close()
 
