@@ -3,6 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 import subprocess
 import resource
 import sys
+import os
 sys.path.append("../cadical-lit-testing")
 import util 
 
