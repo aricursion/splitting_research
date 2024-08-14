@@ -20,7 +20,7 @@ def main(temp_dir, log_dir, cnf_file):
             "--cube-size",
             "10",
             "--log",
-            str(os.path.join(log_dir, str(i) + ".log")),
+            str(os.path.join(log_dir, str(i * 1000000) + ".log")),
             "--cube-procs",
             "20",
             "--solve-procs",
@@ -52,4 +52,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.temp_dir, args.log_dir, args.cnf_file)
+    main(args.tmp_dir, args.log_dir, args.cnf)
