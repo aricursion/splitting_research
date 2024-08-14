@@ -11,6 +11,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--cnf", dest="cnf",required=True)
     parser.add_argument("--icnf", dest="icnf", default=None)
+    parser.add_argument("--depth", dest="depth",default=None, type=int)
     parser.add_argument("--tmp-dir", dest="tmp_dir", required=True)
     parser.add_argument("--procs", type=int, required=True)
     parser.add_argument("--log", required=True)
@@ -21,7 +22,10 @@ if __name__ == "__main__":
         icnf = "/tmp/cubes.icnf"
     else:
         icnf = args.icnf
-    cmd = ["march", args.cnf, f"-o {icnf}"]
+    cmd = ["march", args.cnf, "-o", icnf]
+    if args.depth != None:
+        cmd.append("-d")
+        cmd.append(str(args.depth))
     usage_start = resource.getrusage(resource.RUSAGE_CHILDREN)
     subprocess.run(cmd)
     usage_end = resource.getrusage(resource.RUSAGE_CHILDREN)
