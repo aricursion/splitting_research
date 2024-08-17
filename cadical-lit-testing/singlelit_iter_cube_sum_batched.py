@@ -6,6 +6,7 @@ import util
 import random
 from concurrent.futures import ProcessPoolExecutor
 import argparse
+import itertools
 import multiprocessing
 import os
 
@@ -13,10 +14,9 @@ import os
 def config_to_string(args):
     out = "cnf: {} ".format(args.cnf)
     out += "lit-start: {} ".format(args.lit_start)
+    out += "batch-size: {} ".format(args.batch_size)
     out += "samples: {} ".format(args.num_samples)
     out += "mode: {}".format(args.mode)
-    out += "time cutoff: {}".format(args.time_cutoff)
-    out += "base cube size: {}".format(args.cube_size)
     return out
 
 
@@ -30,52 +30,55 @@ def find_cube_par(args):
     log_file = open(args.log, "a")
     while todo != []:
         procs = []
-        samples = random.sample(todo, args.num_samples)
-        for sample in samples:
-            cnf = util.add_cube_to_cnf(args.cnf, sample, tmp=args.tmp_dir)
-            proc = util.executor_sat.submit(
-                util.run_cadical_litset,
-                cnf,
-                1,
-                args.lit_start,
-                args.lit_set_size,
-                args.mode,
-            )
-            procs.append((proc, sample, cnf))
-        no_split = set()
-        all_sample_data = []
-        for proc, cc, cnf in procs:
+        batches = list(itertools.batched(todo, args.batch_size))
+        for i, batch in enumerate(batches):
+            if len(batch) >= args.num_samples:
+                samples = random.sample(batch, args.num_samples)
+            else:
+                samples = batch
+            for sample in samples:
+                cnf = util.add_cube_to_cnf(args.cnf, sample, tmp=args.tmp_dir)
+                proc = util.executor_sat.submit(
+                    util.run_cadical_litset,
+                    cnf,
+                    1,
+                    args.lit_start,
+                    args.lit_set_size,
+                    args.mode,
+                )
+                procs.append((proc, sample, cnf, i))
+        batch_data = {}
+        for proc, cc, cnf, i in procs:
             output = proc.result().stdout.decode("utf-8").strip()
             os.remove(cnf)
             lit_count_dict, time = util.parse_lit_set_ext(output)
             log_file.write(f"cubing time: {time}\n")
             log_file.flush()
-            if args.time_cutoff != None and time <= args.time_cutoff:
-                no_split.add(tuple(cc))
-                result.append(cc)
+            if i in batch_data:
+                batch_data[i] = batch_data[i] + [(cc, lit_count_dict)]
             else:
-                all_sample_data.append((cc, lit_count_dict))
-        combined_dict = {}
-        for sample, lit_count_dict in all_sample_data:
-            for lit, score in lit_count_dict.items():
-                if lit not in combined_dict:
-                    combined_dict[lit] = score
-                else:
-                    combined_dict[lit] = combined_dict[lit] + score
-        split_lit = max(combined_dict, key=combined_dict.get)
-        print(split_lit)
-        new_todo = []
-        for cc in todo:
-            if tuple(cc) in no_split:
-                pass
-            else:
+                batch_data[i] = [(cc, lit_count_dict)]
+        todo = []
+        print(batch_data)
+        for i, batch_data_list in batch_data.items():
+            split_lit = -1
+            combined_dict = {}
+            for sample, lit_count_dict in batch_data_list:
+                for k, v in lit_count_dict.items():
+                    if k not in combined_dict:
+                        combined_dict[k] = v
+                    else:
+                        combined_dict[k] = combined_dict[k] + v
+            split_lit = max(combined_dict, key=combined_dict.get)
+            print(split_lit)
+
+            for cc in batches[i]:
                 if len(cc) + 1 < args.cube_size:
-                    new_todo.append(cc + [split_lit])
-                    new_todo.append(cc + [-split_lit])
+                    todo.append(cc + [split_lit])
+                    todo.append(cc + [-split_lit])
                 else:
                     result.append(cc + [split_lit])
                     result.append(cc + [-split_lit])
-        todo = new_todo
     log_file.close()
     return result
 
