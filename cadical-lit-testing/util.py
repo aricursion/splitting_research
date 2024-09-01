@@ -63,6 +63,7 @@ def run_cadical_lits(
     lit_start: int,
     lit_recent: bool,
     mode: int,
+    sat_mode=-1,
 ):
     cmd = [
         "./cadical-lits",
@@ -79,13 +80,24 @@ def run_cadical_lits(
 
     if lit_recent:
         cmd.append("--litrecent")
-
+    match sat_mode:
+        case 0:
+            cmd.append("--plain")
+        case 1:
+            cmd.append("--sat")
+        case 2:
+            cmd.append("--unsat")
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
     return p
 
 
 def run_cadical_litset(
-    cnf_loc: str, lit_count: int, lit_start: int, lit_set_size: int, mode: int
+    cnf_loc: str,
+    lit_count: int,
+    lit_start: int,
+    lit_set_size: int,
+    mode: int,
+    sat_mode=-1,
 ):
     cmd = [
         "./cadical-lits",
@@ -100,6 +112,13 @@ def run_cadical_litset(
         f"--litprintmode={mode}",
         "--litprintextra",
     ]
+    match sat_mode:
+        case 0:
+            cmd.append("--plain")
+        case 1:
+            cmd.append("--sat")
+        case 2:
+            cmd.append("--unsat")
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE)
     return p

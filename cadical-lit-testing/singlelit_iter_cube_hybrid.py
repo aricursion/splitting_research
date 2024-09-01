@@ -32,7 +32,15 @@ def find_cube_rec(args):
             current_cube = todo.pop()
             cnf = util.add_cube_to_cnf(args.cnf, current_cube, tmp=args.tmp_dir)
             proc = util.executor_sat.submit(
-                util.run_cadical_lits, cnf, 1, 0, 0, args.cutoff, False, 1
+                util.run_cadical_lits,
+                cnf,
+                1,
+                0,
+                0,
+                args.cutoff,
+                False,
+                1,
+                sat_mode=args.sat_mode,
             )
             procs.append((proc, current_cube, cnf))
         for proc, cc, cnf in procs:
@@ -76,6 +84,7 @@ def find_cube_sum(args, init_cube):
                 args.cutoff,
                 args.lit_set_size,
                 1,
+                sat_mode=args.sat_mode,
             )
             procs.append((proc, sample, cnf))
 
@@ -170,16 +179,19 @@ if __name__ == "__main__":
         action=argparse.BooleanOptionalAction,
         default=False,
     )
-    parser.add_argument("--dynamic-depth", dest="dynamic_depth", type=int, required=True)
+    parser.add_argument(
+        "--dynamic-depth", dest="dynamic_depth", type=int, required=True
+    )
     parser.add_argument("--cutoff-time", dest="cutoff_time", type=float, default=1)
 
     parser.add_argument("--num-samples", dest="num_samples", type=int, default=32)
 
     parser.add_argument("--lit-set-size", dest="lit_set_size", type=int, default=32)
+    parser.add_argument("--sat-mode", dest="sat_mode", type=int, default=-1)
     args = parser.parse_args()
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
-    
+
     os.makedirs(args.tmp_dir, exist_ok=True)
     try:
         os.makedirs(os.path.dirname(args.log), exist_ok=True)
