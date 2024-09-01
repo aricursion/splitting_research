@@ -17,6 +17,7 @@ def config_to_string(args):
     out += "cutoff time: {}".format(args.cutoff_time)
     out += "num samples: {}".format(args.num_samples)
     out += "dynamic depth: {}".format(args.dynamic_depth)
+    out += "sat mode: {}".format(args.sat_mode)
     return out
 
 
