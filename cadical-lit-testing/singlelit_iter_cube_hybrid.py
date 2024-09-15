@@ -40,7 +40,7 @@ def find_cube_rec(args):
                 0,
                 args.cutoff,
                 False,
-                1,
+                args.score_mode,
                 sat_mode=args.sat_mode,
             )
             procs.append((proc, current_cube, cnf))
@@ -189,6 +189,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--lit-set-size", dest="lit_set_size", type=int, default=32)
     parser.add_argument("--sat-mode", dest="sat_mode", type=int, default=-1)
+    parser.add_argument("--score-mode", dest="sat_mode", type=int, default=1)
     args = parser.parse_args()
 
     util.executor_sat = ProcessPoolExecutor(max_workers=args.cube_procs)
